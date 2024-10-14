@@ -24,7 +24,12 @@ This is a networked multiplayer version of the classic Snake game, implemented i
    git clone https://github.com/jdahlborg/snake.git
    cd snake
    ```
-2. Install Dependencies:
+2. Create and activate a virtual environment:
+   ```
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+3. Install Dependencies:
    ```
    pip install -r requirements.txt
    ```
