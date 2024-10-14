@@ -4,6 +4,7 @@ import socket
 import threading
 import json
 import time
+import sys
 
 # Socket setup
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -68,14 +69,14 @@ def show_start_screen():
     while waiting:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
+                running = False
+                waiting = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:  # Start the game when SPACE is pressed
                     waiting = False
                 if event.key == pygame.K_ESCAPE:  # Quit the game when ESC is pressed
-                    pygame.quit()
-                    quit()
+                    running = False
+                    waiting = False
 
 def game_over():
     font = pygame.font.SysFont('arial', 35)
