@@ -30,13 +30,10 @@ This is a multiplayer version of the classic Snake game, implemented in Python u
 ## How to Play
 1. Run the game:
    ```
-   python snake_game.py
+   python snake.py
    ```
-2. Use the following controls:
-   - Player 1: Arrow keys
-   - Player 2: WASD keys
-   - Player 3: IJKL keys
-   - Player 4: Numpad 8456
+2. Use the following controls for all players:
+   - Arrow keys
 
 ## Contributing
 Contributions are welcome! Please feel free to submit a Pull Request.
