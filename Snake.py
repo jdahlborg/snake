@@ -7,8 +7,8 @@ import time
 
 # Socket setup
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(('10.80.207.104', 5555))
-
+#client.connect(('10.80.207.104', 5555))
+client.connect(('0.0.0.0', 5555)) #listen on all network interfaces
 # Initialize Pygame
 pygame.init()
 
@@ -26,6 +26,10 @@ RED = (255, 0, 0)
 # Initialize Game Screen
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Snake Game')
+
+# Load splash screen image
+splash_image = pygame.image.load('snake.png')
+splash_image = pygame.transform.scale(splash_image, (WIDTH, HEIGHT))
 
 # Clock for controlling speed
 clock = pygame.time.Clock()
@@ -53,11 +57,11 @@ def reset_game():
     food_spawn = True
 
 def show_start_screen():
+    screen.blit(splash_image, (0, 0))
     font = pygame.font.SysFont('arial', 35)
     start_surface = font.render('Press SPACE to start or ESC to quit', True, GREEN)
     start_rect = start_surface.get_rect()
-    start_rect.midtop = (WIDTH / 2, HEIGHT / 2)
-    screen.fill(BLACK)
+    start_rect.midtop = (WIDTH / 2, HEIGHT - 50)
     screen.blit(start_surface, start_rect)
     pygame.display.flip()
     waiting = True
