@@ -1,10 +1,12 @@
 # Multiplayer Snake Game
 
+![Snake Game](snake.png)
+
 ## Description
-This is a multiplayer version of the classic Snake game, implemented in Python using the Pygame library. Players control their snakes on a shared game board, competing to grow the longest snake while avoiding collisions.
+This is a networked multiplayer version of the classic Snake game, implemented in Python using the Pygame library. Each player controls their snake on their own device, competing to grow the longest snake while avoiding collisions.
 
 ## Features
-- Multiplayer gameplay (2-4 players)
+- Networked multiplayer gameplay (2-4 players, one player per device)
 - Colorful graphics
 - Real-time score tracking
 - Power-ups and obstacles
@@ -22,9 +24,9 @@ This is a multiplayer version of the classic Snake game, implemented in Python u
    git clone https://github.com/jdahlborg/snake.git
    cd snake
    ```
-2. Install Pygame:
+2. Install Dependencies:
    ```
-   pip install pygame
+   pip install -r requirements.txt
    ```
 
 ## How to Play
