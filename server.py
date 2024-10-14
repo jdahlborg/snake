@@ -20,6 +20,7 @@ def handle_client(client, addr):
             if message:
                 # Update player position from the message
                 data = json.loads(message)
+                print (data) #Debug message
                 positions[addr] = data  # Update positions dictionary
                 broadcast_positions()
         except Exception as e:

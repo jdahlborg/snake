@@ -54,7 +54,7 @@ def reset_game():
 
 def show_start_screen():
     font = pygame.font.SysFont('arial', 35)
-    start_surface = font.render('Press any key to start', True, GREEN)
+    start_surface = font.render('Press SPACE to start or ESC to quit', True, GREEN)
     start_rect = start_surface.get_rect()
     start_rect.midtop = (WIDTH / 2, HEIGHT / 2)
     screen.fill(BLACK)
@@ -67,11 +67,15 @@ def show_start_screen():
                 pygame.quit()
                 quit()
             if event.type == pygame.KEYDOWN:
-                waiting = False
+                if event.key == pygame.K_SPACE:  # Start the game when SPACE is pressed
+                    waiting = False
+                if event.key == pygame.K_ESCAPE:  # Quit the game when ESC is pressed
+                    pygame.quit()
+                    quit()
 
 def game_over():
     font = pygame.font.SysFont('arial', 35)
-    game_over_surface = font.render('Game Over! Press any key to restart', True, RED)
+    game_over_surface = font.render('Game Over! Press SPACE to restart or ESC to quit', True, RED)
     game_over_rect = game_over_surface.get_rect()
     game_over_rect.midtop = (WIDTH / 2, HEIGHT / 4)
     screen.fill(BLACK)
@@ -85,8 +89,15 @@ def game_over():
                 pygame.quit()
                 quit()
             if event.type == pygame.KEYDOWN:
-                waiting = False
-                reset_game()
+                if event.key == pygame.K_SPACE:  # Reset the game when SPACE is pressed
+                    waiting = False
+                    reset_game()
+                if event.key == pygame.K_ESCAPE:  # Quit the game when ESC is pressed
+                    pygame.quit()
+                    quit()
+
+
+
 
 # Send player's position and direction to the server
 def send_player_data():
@@ -127,6 +138,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:  # Exit the game when Esc is pressed
+                running = False
             if event.key == pygame.K_UP and snake_direction != 'DOWN':
                 change_direction = 'UP'
             if event.key == pygame.K_DOWN and snake_direction != 'UP':
@@ -167,7 +180,7 @@ while running:
         pygame.draw.rect(screen, GREEN, (part[0], part[1], SNAKE_SIZE, SNAKE_SIZE))
     pygame.draw.rect(screen, RED, (food_pos[0], food_pos[1], SNAKE_SIZE, SNAKE_SIZE))
 
-    # Draw other players
+    # Draw other players (if implemented)
     for addr, player_data in other_players.items():
         player_pos = player_data['position']
         pygame.draw.rect(screen, WHITE, (player_pos[0], player_pos[1], SNAKE_SIZE, SNAKE_SIZE))
