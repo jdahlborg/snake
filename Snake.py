@@ -53,6 +53,7 @@ class SnakeGame:
         self.food_spawn = True
         self.other_players = {}
         self.running = True
+        self.score = 0  # Initialize score
 
     def reset_game(self):
         self.snake_pos = (100, 50)
@@ -126,6 +127,13 @@ class SnakeGame:
                 self.running = False
                 break
 
+    def update_score(self):
+        self.score += 10  # Increment score when food is eaten
+
+    def draw_score(self):
+        score_text = f"Score: {self.score}"
+        self.draw_text(score_text, 30, self.WHITE, self.WIDTH / 2, 10)  # Display score at the top center
+
     def run(self):
         if not self.running:
             return
@@ -173,6 +181,7 @@ class SnakeGame:
             self.snake_body.insert(0, self.snake_pos)
             if self.snake_pos == self.food_pos:
                 self.food_spawn = False
+                self.update_score()  # Update score when food is eaten
             else:
                 self.snake_body.pop()
 
@@ -182,7 +191,7 @@ class SnakeGame:
                                 random.randrange(1, (self.HEIGHT // self.SNAKE_SIZE)) * self.SNAKE_SIZE)
                 self.food_spawn = True
 
-            # Clear screen and draw snake and food
+            # Clear screen and draw snake, food, and score
             self.screen.fill(self.BLACK)
             for part in self.snake_body:
                 pygame.draw.rect(self.screen, self.GREEN, (part[0], part[1], self.SNAKE_SIZE, self.SNAKE_SIZE))
@@ -192,6 +201,8 @@ class SnakeGame:
             for player_data in self.other_players.values():
                 player_pos = player_data['position']
                 pygame.draw.rect(self.screen, self.WHITE, (player_pos[0], player_pos[1], self.SNAKE_SIZE, self.SNAKE_SIZE))
+
+            self.draw_score()  # Draw the score on the screen
 
             # Check for collisions with boundaries or self
             if (self.snake_pos[0] < 0 or self.snake_pos[0] >= self.WIDTH or
