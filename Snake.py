@@ -4,11 +4,11 @@ import socket
 import threading
 import json
 import time
-import sys
 
 class SnakeGame:
     # Game Constants
     WIDTH, HEIGHT = 640, 480
+    BORDER_OFFSET = 70
     SNAKE_SIZE = 10
     FPS = 15
 
@@ -40,6 +40,14 @@ class SnakeGame:
         self.splash_image = pygame.image.load('snake.png')
         self.splash_image = pygame.transform.scale(self.splash_image, (self.WIDTH, self.HEIGHT))
 
+        # Load background image
+        try:
+            self.background = pygame.image.load('game_bg.png')
+            self.background = pygame.transform.scale(self.background, (self.WIDTH, self.HEIGHT))
+        except pygame.error as e:
+            print(f"Error loading background image: {e}")
+            self.background = None
+
         # Clock for controlling speed
         self.clock = pygame.time.Clock()
 
@@ -56,12 +64,20 @@ class SnakeGame:
         self.score = 0  # Initialize score
 
     def reset_game(self):
-        self.snake_pos = (100, 50)
-        self.snake_body = [(100, 50), (90, 50), (80, 50)]
+        self.snake_pos = (self.WIDTH // 2, self.HEIGHT // 2)
+        self.snake_body = [self.snake_pos, (self.snake_pos[0] - self.SNAKE_SIZE, self.snake_pos[1]), 
+                           (self.snake_pos[0] - 2 * self.SNAKE_SIZE, self.snake_pos[1])]
         self.snake_direction = 'RIGHT'
         self.change_direction = self.snake_direction
-        self.food_pos = (random.randrange(1, (self.WIDTH // self.SNAKE_SIZE)) * self.SNAKE_SIZE,
-                         random.randrange(1, (self.HEIGHT // self.SNAKE_SIZE)) * self.SNAKE_SIZE)
+        self.spawn_food()
+
+    def spawn_food(self):
+        self.food_pos = (
+            random.randrange(self.BORDER_OFFSET // self.SNAKE_SIZE, 
+                             (self.WIDTH - self.BORDER_OFFSET) // self.SNAKE_SIZE) * self.SNAKE_SIZE,
+            random.randrange(self.BORDER_OFFSET // self.SNAKE_SIZE, 
+                             (self.HEIGHT - self.BORDER_OFFSET) // self.SNAKE_SIZE) * self.SNAKE_SIZE
+        )
         self.food_spawn = True
 
     def show_start_screen(self):
@@ -93,7 +109,8 @@ class SnakeGame:
                             waiting = False
 
     def game_over(self):
-        self.draw_text('Game Over! Press SPACE to restart or ESC to quit', 35, self.RED, self.WIDTH / 2, self.HEIGHT / 4)
+        self.draw_text('Game Over!', 35, self.RED, self.WIDTH / 2, self.HEIGHT / 4)
+        self.draw_text('Press SPACE to restart or ESC to quit', 25, self.RED, self.WIDTH / 2, self.HEIGHT / 4 + 40)
         pygame.display.flip()
         self.wait_for_key([pygame.K_SPACE, pygame.K_ESCAPE])
         if self.running:
@@ -131,8 +148,7 @@ class SnakeGame:
         self.score += 10  # Increment score when food is eaten
 
     def draw_score(self):
-        score_text = f"Score: {self.score}"
-        self.draw_text(score_text, 30, self.WHITE, self.WIDTH / 2, 10)  # Display score at the top center
+        self.draw_text(str(self.score), 25, self.BLACK, self.WIDTH / 2, 5)  # Display score at the top center
 
     def run(self):
         if not self.running:
@@ -193,6 +209,11 @@ class SnakeGame:
 
             # Clear screen and draw snake, food, and score
             self.screen.fill(self.BLACK)
+            if self.background:
+                self.screen.blit(self.background, (0, 0))  # Draw the background image first
+            else:
+                self.screen.fill(self.BLACK)  # Fallback to black if image not loaded
+
             for part in self.snake_body:
                 pygame.draw.rect(self.screen, self.GREEN, (part[0], part[1], self.SNAKE_SIZE, self.SNAKE_SIZE))
             pygame.draw.rect(self.screen, self.RED, (self.food_pos[0], self.food_pos[1], self.SNAKE_SIZE, self.SNAKE_SIZE))
@@ -202,11 +223,16 @@ class SnakeGame:
                 player_pos = player_data['position']
                 pygame.draw.rect(self.screen, self.WHITE, (player_pos[0], player_pos[1], self.SNAKE_SIZE, self.SNAKE_SIZE))
 
-            self.draw_score()  # Draw the score on the screen
+            self.draw_score()  # Draw the score on the screen after the background
 
-            # Check for collisions with boundaries or self
-            if (self.snake_pos[0] < 0 or self.snake_pos[0] >= self.WIDTH or
-                    self.snake_pos[1] < 0 or self.snake_pos[1] >= self.HEIGHT or
+            # Draw borders
+            pygame.draw.rect(self.screen, self.WHITE, (self.BORDER_OFFSET, self.BORDER_OFFSET, 
+                                                       self.WIDTH - 2 * self.BORDER_OFFSET, 
+                                                       self.HEIGHT - 2 * self.BORDER_OFFSET), 1)
+
+            # Check for collisions with boundaries or self, considering border offsets
+            if (self.snake_pos[0] < self.BORDER_OFFSET or self.snake_pos[0] >= self.WIDTH - self.BORDER_OFFSET or
+                    self.snake_pos[1] < self.BORDER_OFFSET or self.snake_pos[1] >= self.HEIGHT - self.BORDER_OFFSET or
                     self.snake_body[0] in self.snake_body[1:]):
                 self.game_over()
 
