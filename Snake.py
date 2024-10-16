@@ -110,8 +110,13 @@ class SnakeGame:
 
     def show_start_screen(self):
         self.screen.blit(self.start_image, (0, 0))
+        # Display server IP and port
+        server_info = f'Server: {self.client.getpeername()[0]}:{self.client.getpeername()[1]}'
+        self.draw_text(server_info, 20, self.WHITE, self.WIDTH / 2, 70)
+        
         self.draw_text('Wait for other players', 25, self.GREEN, self.WIDTH / 2, 100)
         self.draw_text('Press SPACE to start or ESC to quit', 25, self.GREEN, self.WIDTH / 2, self.HEIGHT - 100)
+        
         pygame.display.flip()
         self.wait_for_key([pygame.K_SPACE, pygame.K_ESCAPE])
 
@@ -194,9 +199,7 @@ class SnakeGame:
 
         self.reset_game()
         self.show_splash_screen()
-        print("Splash screen shown")
         self.show_start_screen()
-        print("Start screen shown")
 
         while self.running:
             for event in pygame.event.get():
