@@ -37,8 +37,20 @@ class SnakeGame:
         pygame.display.set_caption('Snake Game')
 
         # Load splash screen image
-        self.splash_image = pygame.image.load('snake.png')
-        self.splash_image = pygame.transform.scale(self.splash_image, (self.WIDTH, self.HEIGHT))
+        try:
+            self.splash_image = pygame.image.load('snake.png')
+            self.splash_image = pygame.transform.scale(self.splash_image, (self.WIDTH, self.HEIGHT))
+        except pygame.error as e:
+            print(f"Error loading splash image: {e}")
+            self.splash_image = None
+
+        # Load start screen image
+        try:
+            self.start_image = pygame.image.load('bg.png')
+            self.start_image = pygame.transform.scale(self.start_image, (self.WIDTH, self.HEIGHT))
+        except pygame.error as e:
+            print(f"Error loading start screen image: {e}")
+            self.start_image = None
 
         # Load background image
         try:
@@ -80,9 +92,16 @@ class SnakeGame:
         )
         self.food_spawn = True
 
-    def show_start_screen(self):
+    def show_splash_screen(self):
         self.screen.blit(self.splash_image, (0, 0))
-        self.draw_text('Press SPACE to start or ESC to quit', 35, self.GREEN, self.WIDTH / 2, self.HEIGHT - 50)
+        pygame.display.update()  # Ensure the screen updates
+        pygame.event.pump()  # Process internal events to avoid freezing
+        time.sleep(2)
+
+    def show_start_screen(self):
+        self.screen.blit(self.start_image, (0, 0))
+        self.draw_text('Wait for other players', 25, self.GREEN, self.WIDTH / 2, 100)
+        self.draw_text('Press SPACE to start or ESC to quit', 25, self.GREEN, self.WIDTH / 2, self.HEIGHT - 100)
         pygame.display.flip()
         self.wait_for_key([pygame.K_SPACE, pygame.K_ESCAPE])
 
@@ -163,7 +182,10 @@ class SnakeGame:
         receive_thread.start()
 
         self.reset_game()
+        self.show_splash_screen()
+        print("Splash screen shown")
         self.show_start_screen()
+        print("Start screen shown")
 
         while self.running:
             for event in pygame.event.get():
