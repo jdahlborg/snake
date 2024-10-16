@@ -3,8 +3,9 @@ import threading
 import json
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#server.bind(('10.80.207.104', 5555))
-server.bind(('0.0.0.0', 5555))
+#server.bind(('10.80.207.104', 5555))#-
+# Replace '10.80.207.104' with the correct IP address#+
+server.bind(('10.80.207.104', 5555))
 server.listen()
 
 clients = []

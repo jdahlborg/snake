@@ -23,7 +23,7 @@ class SnakeGame:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.settimeout(1.0)
         try:
-            self.client.connect(('0.0.0.0', 5555))  # Listen on all network interfaces
+            self.client.connect(('10.80.207.104', 5555))  # Listen on all network interfaces
         except socket.error:
             print("Unable to connect to the server.")
             self.running = False
@@ -203,9 +203,7 @@ class SnakeGame:
 
             # Spawn new food if eaten
             if not self.food_spawn:
-                self.food_pos = (random.randrange(1, (self.WIDTH // self.SNAKE_SIZE)) * self.SNAKE_SIZE,
-                                random.randrange(1, (self.HEIGHT // self.SNAKE_SIZE)) * self.SNAKE_SIZE)
-                self.food_spawn = True
+                self.spawn_food()  # Correctly spawn food within game boundaries
 
             # Clear screen and draw snake, food, and score
             self.screen.fill(self.BLACK)
@@ -227,8 +225,8 @@ class SnakeGame:
 
             # Draw borders
             pygame.draw.rect(self.screen, self.WHITE, (self.BORDER_OFFSET, self.BORDER_OFFSET, 
-                                                       self.WIDTH - 2 * self.BORDER_OFFSET, 
-                                                       self.HEIGHT - 2 * self.BORDER_OFFSET), 1)
+                                                    self.WIDTH - 2 * self.BORDER_OFFSET, 
+                                                    self.HEIGHT - 2 * self.BORDER_OFFSET), 1)
 
             # Check for collisions with boundaries or self, considering border offsets
             if (self.snake_pos[0] < self.BORDER_OFFSET or self.snake_pos[0] >= self.WIDTH - self.BORDER_OFFSET or
@@ -247,4 +245,4 @@ class SnakeGame:
 
 if __name__ == "__main__":
     game = SnakeGame()
-    game.run()
+    game.run()        
