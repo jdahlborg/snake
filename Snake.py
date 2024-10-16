@@ -194,9 +194,7 @@ class SnakeGame:
 
         self.reset_game()
         self.show_splash_screen()
-        print("Splash screen shown")
         self.show_start_screen()
-        print("Start screen shown")
 
         while self.running:
             for event in pygame.event.get():
