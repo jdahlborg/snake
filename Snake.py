@@ -83,6 +83,8 @@ class SnakeGame:
         self.other_players = {}
         self.running = True
         self.score = 0  # Initialize score
+        self.pause = False
+        
 
     def reset_game(self):
         self.snake_pos = (self.WIDTH // 2, self.HEIGHT // 2)
@@ -208,6 +210,8 @@ class SnakeGame:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
+                    if event.key == pygame.K_p:
+                        self.pause = not self.pause
                     if event.key == pygame.K_UP and self.snake_direction != 'DOWN':
                         self.change_direction = 'UP'
                     if event.key == pygame.K_DOWN and self.snake_direction != 'UP':
@@ -218,6 +222,12 @@ class SnakeGame:
                         self.change_direction = 'RIGHT'
 
             self.snake_direction = self.change_direction
+            # Pause the game
+            if self.pause:
+                self.draw_text('Game Paused', 35, self.RED, self.WIDTH / 2, self.HEIGHT / 4)
+                self.draw_text('Press P to resume', 25, self.RED, self.WIDTH / 2, self.HEIGHT / 4 + 40)
+                pygame.display.update()
+                continue
 
             # Move snake
             if self.snake_direction == 'UP':
@@ -228,6 +238,8 @@ class SnakeGame:
                 self.snake_pos = (self.snake_pos[0] - self.SNAKE_SIZE, self.snake_pos[1])
             if self.snake_direction == 'RIGHT':
                 self.snake_pos = (self.snake_pos[0] + self.SNAKE_SIZE, self.snake_pos[1])
+                
+            
 
             # Snake growing logic
             self.snake_body.insert(0, self.snake_pos)
