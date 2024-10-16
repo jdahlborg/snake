@@ -83,23 +83,32 @@ class SnakeGame:
         self.other_players = {}
         self.running = True
         self.score = 0  # Initialize score
+        self.fruits_eaten = 0
+        self.FPS = 15
 
     def reset_game(self):
+        # Reset game states
         self.snake_pos = (self.WIDTH // 2, self.HEIGHT // 2)
         self.snake_body = [self.snake_pos, (self.snake_pos[0] - self.SNAKE_SIZE, self.snake_pos[1]), 
                            (self.snake_pos[0] - 2 * self.SNAKE_SIZE, self.snake_pos[1])]
         self.snake_direction = 'RIGHT'
         self.change_direction = self.snake_direction
         self.score = 0 
+        self.fruits_eaten = 0  # Reset fruit counter
         self.spawn_food()
 
     def spawn_food(self):
-        self.food_pos = (
-            random.randrange(self.BORDER_OFFSET // self.SNAKE_SIZE, 
-                             (self.WIDTH - self.BORDER_OFFSET) // self.SNAKE_SIZE) * self.SNAKE_SIZE,
-            random.randrange(self.BORDER_OFFSET // self.SNAKE_SIZE, 
-                             (self.HEIGHT - self.BORDER_OFFSET) // self.SNAKE_SIZE) * self.SNAKE_SIZE
-        )
+        while True:
+            food_pos = (
+                random.randrange(self.BORDER_OFFSET // self.SNAKE_SIZE, 
+                                 (self.WIDTH - self.BORDER_OFFSET) // self.SNAKE_SIZE) * self.SNAKE_SIZE,
+                random.randrange(self.BORDER_OFFSET // self.SNAKE_SIZE, 
+                                 (self.HEIGHT - self.BORDER_OFFSET) // self.SNAKE_SIZE) * self.SNAKE_SIZE
+            )
+            if food_pos not in self.snake_body:
+                break
+    
+        self.food_pos = food_pos
         self.food_spawn = True
 
     def show_splash_screen(self):
@@ -166,21 +175,33 @@ class SnakeGame:
             time.sleep(0.1)  # Adjust the frequency of sending data
 
     def receive_player_data(self):
+        buffer = ""
         while self.running:
             try:
                 data = self.client.recv(1024).decode('utf-8')
                 if data:
-                    self.other_players = json.loads(data)  # Update other players' positions
-            except socket.timeout:
-                continue
-            except socket.error:
-                print("An error occurred while receiving data!")
-                self.client.close()
-                self.running = False
-                break
+                    buffer += data
+                    # Try to load JSON
+            except:
+                    try:
+                        # Attempt to parse JSON, allowing for extra data
+                        self.other_players = json.loads(buffer)
+                        buffer = ""  # Clear buffer after successful parse
+                    except json.JSONDecodeError as e:
+                        # Handle partial JSON (ignore it for now)
+                        print(f"JSON decode error: {e}. Current buffer: {buffer}")
+                        # If there's extra data, you may want to reset the buffer or process differently.
+                        if "Extra data" in str(e):
+                            # Reset buffer or handle it appropriately
+                            # This is a simple example of clearing the buffer
+                            buffer = buffer.split("}{")[-1]  # Keep the remaining data after the last valid JSON object
 
     def update_score(self):
         self.score += 10  # Increment score when food is eaten
+        self.fruits_eaten += 1  # Increment the fruit eaten counter
+        if self.fruits_eaten % 5 == 0:  # Check if 5 fruits have been eaten
+            self.FPS += 2  # Increase speed (FPS)
+            print(f"Speed increased! New FPS: {self.FPS}")  # For debugging
 
     def draw_score(self):
         self.draw_text(str(self.score), 25, self.BLACK, self.WIDTH / 2, 5)  # Display score at the top center
