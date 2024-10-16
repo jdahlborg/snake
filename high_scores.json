@@ -1,0 +1,54 @@
+{
+  "high_scores": [
+    {
+      "player": "Johan",
+      "score": 1300,
+      "datetime": "2024-10-14T15:30:00"
+    },
+    {
+      "player": "Charlie",
+      "score": 120,
+      "datetime": "2024-10-13T09:20:00"
+    },
+    {
+      "player": "Dave",
+      "score": 110,
+      "datetime": "2024-10-12T18:45:00"
+    },
+    {
+      "player": "Eve",
+      "score": 100,
+      "datetime": "2024-10-11T14:10:00"
+    },
+    {
+      "player": "Frank",
+      "score": 90,
+      "datetime": "2024-10-10T11:05:00"
+    },
+    {
+      "player": "Grace",
+      "score": 80,
+      "datetime": "2024-10-09T17:00:00"
+    },
+    {
+      "player": "Hank",
+      "score": 70,
+      "datetime": "2024-10-08T08:30:00"
+    },
+    {
+      "player": "Ivy",
+      "score": 60,
+      "datetime": "2024-10-07T10:15:00"
+    },
+    {
+      "player": "Jack",
+      "score": 50,
+      "datetime": "2024-10-06T13:50:00"
+    },
+    {
+      "player": "127.0.0.1:51384",
+      "score": 0,
+      "datetime": "2024-10-15T14:39:49"
+    }
+  ]
+}
