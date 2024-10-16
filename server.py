@@ -1,3 +1,5 @@
+import logging
+import queue
 import socket
 from dotenv import load_dotenv
 import os
@@ -11,79 +13,88 @@ load_dotenv()
 server_ip = os.getenv('SERVER_IP', '127.0.0.1')  # Default to 127.0.0.1 if not set
 server_port = int(os.getenv('SERVER_PORT', 5555))  # Default to 5555 if not set
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((server_ip, server_port))
-server.listen()
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+    server.bind((server_ip, server_port))
+    server.listen()
 
-clients = []  # List of client sockets
-players = []  # List of player names ("Player 1", "Player 2", etc.)
-positions = []  # List of player positions
+    clients = queue.Queue()  # Thread-safe queue for client sockets
+    players = queue.Queue()  # Thread-safe queue for player names ("Player 1", "Player 2", etc.)
+    positions = queue.Queue()  # Thread-safe queue for player positions
 
-def handle_client(client, addr):
-    global positions, players
-    print(f"Connected with {addr}")
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch = logging.StreamHandler()
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
 
-    # Assign a new player name based on the number of clients connected
-    player_name = f"Player {len(clients) + 1}"
-    clients.append(client)
-    players.append(player_name)
-    positions.append(None)  # Placeholder for player position
+    def handle_client(client, addr):
+        global positions, players
+        logger.info(f"Connected with {addr}")
 
-    print(f"{player_name} has joined. Players: {players}")
+        # Assign a new player name based on the number of clients connected
+        player_name = f"Player {clients.qsize() + 1}"
+        clients.put(client)
+        players.put(player_name)
+        positions.put(None)  # Placeholder for player position
 
-    broadcast_clients()  # Send the updated player list to all clients
+        logger.info(f"{player_name} has joined. Players: {list(players.queue)}")
 
-    while True:
-        try:
-            message = client.recv(1024).decode('utf-8')
-            if message:
-                # Update player position from the message
-                data = json.loads(message)
-                print(f"Received data from {player_name}: {data}")  # Debug message
+        broadcast_clients()  # Send the updated player list to all clients
 
-                # Update the position for this player (find the index based on the client socket)
-                index = clients.index(client)
-                positions[index] = data  # Update position at the corresponding index
+        while True:
+            try:
+                message = client.recv(1024).decode('utf-8')
+                if message:
+                    # Update player position from the message
+                    data = json.loads(message)
+                    logger.info(f"Received data from {player_name}: {data}")  # Debug message
 
-                broadcast_positions()  # Broadcast updated positions to all clients
-        except Exception as exception:
-            print(f"Error with {player_name}: {exception}")
-            index = clients.index(client)
+                    # Update the position for this player (find the index based on the client socket)
+                    index = list(clients.queue).index(client)
+                    positions.queue[index] = data  # Update position at the corresponding index
 
-            clients.pop(index)
-            players.pop(index)
-            positions.pop(index)  # Remove the position when the player disconnects
-            client.close()
+                    broadcast_positions()  # Broadcast updated positions to all clients
+            except Exception as exception:
+                logger.error(f"Error with {player_name}: {exception}")
+                index = list(clients.queue).index(client)
 
-            broadcast_clients()  # Update the client list
-            break
+                clients.queue.remove(client)
+                players.queue.remove(player_name)
+                positions.queue.remove(positions.queue[index])  # Remove the position when the player disconnects
+                client.close()
 
-def broadcast_positions():
-    # Prepare a list of positions to broadcast
-    player_positions = {players[i]: positions[i] for i in range(len(players)) if positions[i] is not None}
-    
-    # Send the updated positions to all clients
-    for client in clients:
-        try:
-            client.send(json.dumps(player_positions).encode('utf-8'))
-            print(f"Broadcasting positions: {player_positions}")
-        except:
-            clients.remove(client)
+                broadcast_clients()  # Update the client list
+                break
 
-def broadcast_clients():
-    # Send the updated player list (with player names) to all clients
-    for client in clients:
-        try:
-            client.send(json.dumps({"players": players}).encode('utf-8'))
-            print(f"Broadcasting clients: {players}")
-        except:
-            clients.remove(client)
+    def broadcast_positions():
+        # Prepare a list of positions to broadcast
+        player_positions = {list(players.queue)[i]: list(positions.queue)[i] for i in range(len(list(players.queue))) if list(positions.queue)[i] is not None}
+        
+        # Send the updated positions to all clients
+        for client in list(clients.queue):
+            if client in clients.queue:  # Check if client is still in the queue
+                try:
+                    client.send(json.dumps(player_positions).encode('utf-8'))
+                    logger.info(f"Broadcasting positions: {player_positions}")
+                except:
+                    clients.queue.remove(client)
 
-def start():
-    print("Server is running...")
-    while True:
-        client, addr = server.accept()
-        thread = threading.Thread(target=handle_client, args=(client, addr))
-        thread.start()
+    def broadcast_clients():
+        # Send the updated player list (with player names) to all clients
+        for client in list(clients.queue):
+            if client in clients.queue:  # Check if client is still in the queue
+                try:
+                    client.send(json.dumps({"players": list(players.queue)}).encode('utf-8'))
+                    logger.info(f"Broadcasting clients: {list(players.queue)}")
+                except:
+                    clients.queue.remove(client)
 
-start()
+    def start():
+        logger.info("Server is running...")
+        while True:
+            client, addr = server.accept()
+            thread = threading.Thread(target=handle_client, args=(client, addr))
+            thread.start()
+
+    start()
