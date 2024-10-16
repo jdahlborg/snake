@@ -30,7 +30,7 @@ class SnakeGame:
 
         # Socket setup
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client.settimeout(1.0)
+        self.client.settimeout(10.0)
         try:
             self.client.connect((server_ip, server_port))  # Listen on all network interfaces
         except socket.error:
@@ -90,6 +90,7 @@ class SnakeGame:
                            (self.snake_pos[0] - 2 * self.SNAKE_SIZE, self.snake_pos[1])]
         self.snake_direction = 'RIGHT'
         self.change_direction = self.snake_direction
+        self.score = 0 
         self.spawn_food()
 
     def spawn_food(self):
@@ -138,7 +139,8 @@ class SnakeGame:
 
     def game_over(self):
         self.draw_text('Game Over!', 35, self.RED, self.WIDTH / 2, self.HEIGHT / 4)
-        self.draw_text('Press SPACE to restart or ESC to quit', 25, self.RED, self.WIDTH / 2, self.HEIGHT / 4 + 40)
+        self.draw_text(f'Your Score: {self.score}', 25, self.RED, self.WIDTH / 2, self.HEIGHT / 4 + 40)
+        self.draw_text('Press SPACE to restart or ESC to quit', 25, self.RED, self.WIDTH / 2, self.HEIGHT / 4 + 70)
         pygame.display.flip()
         self.wait_for_key([pygame.K_SPACE, pygame.K_ESCAPE])
         if self.running:
