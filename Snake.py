@@ -94,12 +94,17 @@ class SnakeGame:
         self.spawn_food()
 
     def spawn_food(self):
-        self.food_pos = (
-            random.randrange(self.BORDER_OFFSET // self.SNAKE_SIZE, 
-                             (self.WIDTH - self.BORDER_OFFSET) // self.SNAKE_SIZE) * self.SNAKE_SIZE,
-            random.randrange(self.BORDER_OFFSET // self.SNAKE_SIZE, 
-                             (self.HEIGHT - self.BORDER_OFFSET) // self.SNAKE_SIZE) * self.SNAKE_SIZE
-        )
+        while True:
+            food_pos = (
+                random.randrange(self.BORDER_OFFSET // self.SNAKE_SIZE, 
+                                 (self.WIDTH - self.BORDER_OFFSET) // self.SNAKE_SIZE) * self.SNAKE_SIZE,
+                random.randrange(self.BORDER_OFFSET // self.SNAKE_SIZE, 
+                                 (self.HEIGHT - self.BORDER_OFFSET) // self.SNAKE_SIZE) * self.SNAKE_SIZE
+            )
+            if food_pos not in self.snake_body:
+                break
+    
+        self.food_pos = food_pos
         self.food_spawn = True
 
     def show_splash_screen(self):
@@ -166,18 +171,26 @@ class SnakeGame:
             time.sleep(0.1)  # Adjust the frequency of sending data
 
     def receive_player_data(self):
+        buffer = ""
         while self.running:
             try:
                 data = self.client.recv(1024).decode('utf-8')
                 if data:
-                    self.other_players = json.loads(data)  # Update other players' positions
-            except socket.timeout:
-                continue
-            except socket.error:
-                print("An error occurred while receiving data!")
-                self.client.close()
-                self.running = False
-                break
+                    buffer += data
+                    # Try to load JSON
+            except:
+                    try:
+                        # Attempt to parse JSON, allowing for extra data
+                        self.other_players = json.loads(buffer)
+                        buffer = ""  # Clear buffer after successful parse
+                    except json.JSONDecodeError as e:
+                        # Handle partial JSON (ignore it for now)
+                        print(f"JSON decode error: {e}. Current buffer: {buffer}")
+                        # If there's extra data, you may want to reset the buffer or process differently.
+                        if "Extra data" in str(e):
+                            # Reset buffer or handle it appropriately
+                            # This is a simple example of clearing the buffer
+                            buffer = buffer.split("}{")[-1]  # Keep the remaining data after the last valid JSON object
 
     def update_score(self):
         self.score += 10  # Increment score when food is eaten
