@@ -72,7 +72,7 @@ def broadcast_positions():
     for client in active_clients:
         try:
             json_data = json.dumps(player_positions)
-            client.sendall(json_data.encode('utf-8') + b'\n')  # Add newline as a delimiter
+            client.sendall(json_data.encode('utf-8') + b'\n')  
         except ConnectionError:
             logger.error(f"Connection error while broadcasting positions")
 
