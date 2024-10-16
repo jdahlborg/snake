@@ -1,11 +1,18 @@
 import socket
+from dotenv import load_dotenv
+import os
 import threading
 import json
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#server.bind(('10.80.207.104', 5555))#-
-# Replace '10.80.207.104' with the correct IP address#+
-server.bind(('10.80.207.104', 5555))
+# Load environment variables from .env file
+load_dotenv()
+
+# Get the server IP and port from environment variables
+server_ip = os.getenv('SERVER_IP', '127.0.0.1')  # Default to 127.0.0.1 if not set
+server_port = int(os.getenv('SERVER_PORT', 5555))  # Default to 5555 if not set
+
+server.bind((server_ip, server_port))
 server.listen()
 
 clients = []
@@ -37,6 +44,7 @@ def broadcast_positions():
     for client in clients:
         try:
             client.send(json.dumps(positions).encode('utf-8'))
+            print(positions)
         except:
             clients.remove(client)
 

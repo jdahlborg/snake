@@ -1,6 +1,8 @@
 import pygame
 import random
 import socket
+from dotenv import load_dotenv
+import os
 import threading
 import json
 import time
@@ -19,11 +21,18 @@ class SnakeGame:
     RED = (255, 0, 0)
 
     def __init__(self):
+        # Load environment variables from .env file
+        load_dotenv()
+
+        # Get the server IP and port from environment variables
+        server_ip = os.getenv('SERVER_IP', '127.0.0.1')  # Default to 127.0.0.1 if not set
+        server_port = int(os.getenv('SERVER_PORT', 5555))  # Default to 5555 if not set
+
         # Socket setup
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.settimeout(1.0)
         try:
-            self.client.connect(('10.80.207.104', 5555))  # Listen on all network interfaces
+            self.client.connect((server_ip, server_port))  # Listen on all network interfaces
         except socket.error:
             print("Unable to connect to the server.")
             self.running = False
